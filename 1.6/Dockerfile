@@ -1,11 +1,11 @@
-FROM php:7-alpine3.7
+FROM php:7.0-alpine3.4
 
 RUN apk --no-cache add curl git subversion openssh openssl mercurial tini bash zlib-dev
 
 RUN echo "memory_limit=-1" > "$PHP_INI_DIR/conf.d/memory-limit.ini" \
  && echo "date.timezone=${PHP_TIMEZONE:-UTC}" > "$PHP_INI_DIR/conf.d/date_timezone.ini"
 
-RUN docker-php-ext-install zip
+RUN docker-php-ext-install zip pdo bcmath pcntl
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_HOME /tmp

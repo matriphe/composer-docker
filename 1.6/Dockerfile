@@ -1,15 +1,15 @@
 FROM php:7.0-alpine3.4
 
-RUN apk --update --no-cache add curl git subversion openssh openssl mercurial tini bash zlib-dev gmp gmp-dev
+RUN apk --update --no-cache add git subversion openssh mercurial tini bash zlib-dev gmp gmp-dev sqlite-dev
 
 RUN echo "memory_limit=-1" > "$PHP_INI_DIR/conf.d/memory-limit.ini" \
  && echo "date.timezone=${PHP_TIMEZONE:-UTC}" > "$PHP_INI_DIR/conf.d/date_timezone.ini"
 
-RUN docker-php-ext-install zip pdo bcmath pcntl gmp
+RUN docker-php-ext-install zip pdo bcmath pcntl gmp mysqli pdo_mysql pdo_sqlite
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_HOME /tmp
-ENV COMPOSER_VERSION 1.6.3
+ENV COMPOSER_VERSION 1.6.5
 
 RUN curl -s -f -L -o /tmp/installer.php https://raw.githubusercontent.com/composer/getcomposer.org/b107d959a5924af895807021fcef4ffec5a76aa9/web/installer \
  && php -r " \
@@ -22,7 +22,8 @@ RUN curl -s -f -L -o /tmp/installer.php https://raw.githubusercontent.com/compos
     }" \
  && php /tmp/installer.php --no-ansi --install-dir=/usr/bin --filename=composer --version=${COMPOSER_VERSION} \
  && composer --ansi --version --no-interaction \
- && rm -rf /tmp/* /tmp/.htaccess
+ && rm -rf /tmp/* /tmp/.htaccess \
+ && echo "144.217.203.53 packagist.org" >> /etc/hosts
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 

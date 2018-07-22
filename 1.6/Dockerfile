@@ -2,13 +2,26 @@ FROM php:7.0-alpine3.4
 
 ENV PHP_TIMEZONE Asia/Jakarta
 
-RUN apk --update --no-cache add git subversion openssh mercurial tini bash zlib-dev gmp gmp-dev sqlite-dev patch
+RUN apk --update --no-cache add \
+    git \
+    subversion \
+    openssh \
+    mercurial \
+    tini \
+    bash \
+    zlib-dev \
+    gmp \
+    gmp-dev \
+    sqlite-dev \
+    patch \
+    icu-dev \
+    gettext-dev
 
 RUN echo "memory_limit=-1" > "$PHP_INI_DIR/conf.d/memory-limit.ini" \
  && echo "date.timezone=${PHP_TIMEZONE:-UTC}" > "$PHP_INI_DIR/conf.d/date_timezone.ini"
 
 RUN apk add --no-cache --virtual .build-deps zlib-dev \
- && docker-php-ext-install zip pdo bcmath pcntl gmp mysqli pdo_mysql pdo_sqlite \
+ && docker-php-ext-install zip pdo bcmath pcntl gmp mysqli pdo_mysql pdo_sqlite intl \
  && runDeps="$( \
     scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
     | tr ',' '\n' \
@@ -33,8 +46,7 @@ RUN curl -s -f -L -o /tmp/installer.php https://raw.githubusercontent.com/compos
     }" \
  && php /tmp/installer.php --no-ansi --install-dir=/usr/bin --filename=composer --version=${COMPOSER_VERSION} \
  && composer --ansi --version --no-interaction \
- && rm -rf /tmp/* /tmp/.htaccess \
- && echo "144.217.203.53 packagist.org" >> /etc/hosts
+ && rm -rf /tmp/* /tmp/.htaccess
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
